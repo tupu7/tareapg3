@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Excel AI Chat</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.chat-container {
+    width: 600px;
+    height: 80vh;
+    background: #1e293b;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.header {
+    padding: 15px;
+    background: #020617;
+    text-align: center;
+    font-weight: bold;
+}
+
+.messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+.message {
+    margin-bottom: 12px;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 80%;
+}
+
+.you {
+    background: #2563eb;
+    align-self: flex-end;
+}
+
+.ai {
+    background: #334155;
+    align-self: flex-start;
+}
+
+.label {
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.input-area {
+    display: flex;
+    border-top: 1px solid #475569;
+}
+
+input {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    outline: none;
+    background: #020617;
+    color: white;
+}
+
+button {
+    padding: 12px 20px;
+    background: #22c55e;
+    border: none;
+    cursor: pointer;
+}
+</style>
+
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="header">Excel AI Chatbot</div>
+
+    <div id="messages" class="messages"></div>
+
+    <div class="input-area">
+        <input id="input" placeholder="Ask something about the Excel..." onkeydown="if(event.key==='Enter') sendMessage()">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+async function sendMessage() {
+    const input = document.getElementById("input");
+    const text = input.value;
+
+    if (!text) return;
+
+    addMessage("You", text, "you");
+
+    input.value = "";
+
+    const response = await fetch("/chat", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ question: text })
+    });
+
+    const data = await response.json();
+
+    addMessage("AI", data.answer || data.error, "ai");
+}
+
+function addMessage(label, text, type) {
+    const container = document.getElementById("messages");
+
+    const div = document.createElement("div");
+    div.classList.add("message", type);
+
+    div.innerHTML = `
+        <div class="label">${label}</div>
+        <div>${text}</div>
+    `;
+
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+</script>
+
+</body>
+</html>
